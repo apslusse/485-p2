@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><title>insta485</title></head>
+<body>
+    <a href="/"></a>
+    <a href="/explore/">explore</a>
+    <a href="/u/{{logname}}/">{{logname}}</a>
+
+    {% for post in posts %}
+    <a href="/p/{{post.postid}}/">{{post.timestamp}}</a>
+    <a href="/u/{{post.owner}}/">{{post.owner}}</a>
+    <img src="{{post.owner_img_url}}" alt="Smiley face">
+    <img src="{{post.img_url}}" alt="Smiley face">
+
+      {% if post.likes == 1 %}
+              <p>{{post.likes}} like</p>
+      {% else %}
+            <p>{{post.likes}} likes</p>
+      {% endif %}
+
+    {% for comment in post.comments %}
+    <a href="/u/{{comment.owner}}/">{{comment.owner}}</a>
+    <p>{{comment.text}}</p>
+    {% endfor %}
+    {% endfor %}
+
+</body>
+</html>
