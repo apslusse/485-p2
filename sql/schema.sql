@@ -42,7 +42,7 @@ CREATE TABLE comments(
 CREATE TABLE likes(
   owner VARCHAR(20) NOT NULL,
   postid VARCHAR(20) NOT NULL,
-  PRIMARY KEY(owner,post_id),
+  PRIMARY KEY(owner,postid),
   FOREIGN KEY (owner) REFERENCES users(username) ON DELETE CASCADE,
   FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
 );
