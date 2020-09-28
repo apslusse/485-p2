@@ -31,7 +31,7 @@ CREATE TABLE following(
 CREATE TABLE comments(
   commentid INT NOT NULL,
   owner VARCHAR(20) NOT NULL,
-  postid VARCHAR(20) NOT NULL,
+  postid INT NOT NULL,
   text TEXT(1024) NOT NULL,
   created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(commentid),
@@ -41,7 +41,7 @@ CREATE TABLE comments(
 
 CREATE TABLE likes(
   owner VARCHAR(20) NOT NULL,
-  postid VARCHAR(20) NOT NULL,
+  postid INT NOT NULL,
   PRIMARY KEY(owner,postid),
   FOREIGN KEY (owner) REFERENCES users(username) ON DELETE CASCADE,
   FOREIGN KEY (postid) REFERENCES posts(postid) ON DELETE CASCADE
