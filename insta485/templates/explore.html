@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head><title>insta485</title></head>
+    <body>
+      <a href="/"></a>
+      <a href="/explore/">explore</a>
+      <a href="/u/{{logname}}">{{logname}}</a>
+
+      <p>Discover People</p>
+      {% for entry in not_following %}
+        <img src="{{entry.user_img_url}}" alt="Smiley face">
+        <a href="/u/{{entry.username}}">{{entry.username}}</a>
+      {% endfor %}
+    </body>
+</html>
