@@ -24,6 +24,7 @@ app.config.from_envvar('INSTA485_SETTINGS', silent=True)
 import insta485.views  # noqa: E402  pylint: disable=wrong-import-position
 import insta485.model  # noqa: E402  pylint: disable=wrong-import-position
 
+@app.route('/index')
 @app.route('/')
-def home():
+def index():
     return "Hello!"
