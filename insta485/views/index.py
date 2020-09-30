@@ -12,21 +12,23 @@ import os
 def show_index():
     """Display / route."""
     if flask.request.method == 'POST':
-        postid = int(flask.request.values.get('postid'))
+        postid = flask.request.values.get('postid')
         text = flask.request.values.get('text')
-        submit = flask.request.values.get('which')
-
-        if str(submit) == 'like':
+        like = flask.request.values.get('like')
+        unlike = flask.request.values.get('unlike')
+        comment = flask.request.values.get('comment')
+        if str(like) == 'like':
             insta485.model.likePost(postid)
-        elif str(submit) == 'unlike':
+        elif str(unlike) == 'unlike':
             insta485.model.unlikePost(postid)
-        else:
+        elif str(comment) == 'comment':
             return insta485.model.addComment(postid, text)
+        return insta485.model.setIndex()
     if "username" in flask.session:
         # Connect to database
         return insta485.model.setIndex()
     else:
-        return flask.render_template("login.html")
+        return flask.redirect(flask.url_for("login"))
 
 
 
@@ -35,7 +37,8 @@ def login():
     if flask.request.method == 'POST':
         username = str(flask.request.values.get('username'))
         password = str(flask.request.values.get('password'))
-        return insta485.model.login(username, password)
+        insta485.model.login(username, password)
+        return flask.redirect(flask.url_for("show_index"))
     else:
         if "username" in flask.session:
             return flask.redirect(flask.url_for("show_index"))
@@ -76,15 +79,13 @@ def edit():
 
 @insta485.app.route('/accounts/delete/', methods=['GET', 'POST'])
 def delete():
-    if "username" in flask.session:
-        if flask.request.method == 'POST':
-            insta485.model.delete()
-            flask.session.clear()
-            return flask.redirect(flask.url_for("create"))
-        else:
-            context = {"username" : flask.session["username"] }
-            return flask.render_template("delete.html", **context)
-    flask.abort(403)
+    if flask.request.method == 'POST':
+        insta485.model.delete()
+        flask.session.clear()
+        return flask.redirect(flask.url_for("create"))
+    context = {"username" : flask.session["username"] }
+    return flask.render_template("delete.html", **context)
+
 
 
 
@@ -138,6 +139,7 @@ def following(username_url_slug):
 def post(postid_url_slug):
     if flask.request.method == 'POST':
         submit = flask.request.values.get('which')
+        delete = flask.request.values.get('delete')
         if str(submit) == 'like':
             insta485.model.likePost(postid_url_slug)
         elif str(submit) == 'unlike':
@@ -148,8 +150,9 @@ def post(postid_url_slug):
         elif str(submit) == 'deletecomment':
             id = flask.request.values.get('commentid')
             return insta485.model.deleteComment(id)
-        elif str(submit) == 'deletepost':
-            return insta485.model.deletePost(postid_url_slug)
+        elif str(delete) == 'delete this post':
+            insta485.model.deletePost(postid_url_slug)
+            return flask.redirect(flask.url_for("user", postid_url_slug=postid_url_slug))
 
     return insta485.model.showPost(postid_url_slug)
 
@@ -158,6 +161,5 @@ def explore():
     if flask.request.method == 'POST':
         submit = flask.request.values.get('which')
         username = flask.request.values.get('username')
-        if str(submit) == 'follow':
-            return insta485.model.followUser(username)
+        return insta485.model.followUser(username)
     return insta485.model.explore()

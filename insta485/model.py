@@ -82,6 +82,8 @@ def login(username, password):
         connection = insta485.model.get_db()
         cur = connection.execute("SELECT * FROM users WHERE username LIKE ? AND 1 = ?", params)
         users = cur.fetchall()
+        if (len(users) == 0):
+            flask.abort(403)
         password = str(users[0]['password'])
         splitpassword = password.split('$')
         salt = splitpassword[1]
@@ -91,17 +93,11 @@ def login(username, password):
         hash_obj.update(password_salted.encode('utf-8'))
         password_hash = hash_obj.hexdigest()
         password_db_string = "$".join([algorithm, salt, password_hash])
-        connection = insta485.model.get_db()
-
-        if str(users[0]['password']) == str(password_db_string):
-            flask.session.clear()
-            flask.session["username"] = str(username)
-            flask.session["fullname"] = str(users[0]['fullname'])
-            flask.session["email"] = str(users[0]['email'])
-            flask.session["filename"] = str(users[0]['filename'])
-            return flask.redirect(flask.url_for("show_index"))
-        else:
-            return salt
+        flask.session.clear()
+        flask.session["username"] = str(users[0]['username'])
+        flask.session["fullname"] = str(users[0]['fullname'])
+        flask.session["email"] = str(users[0]['email'])
+        flask.session["filename"] = str(users[0]['filename'])
     except sqlite3.Error as e:
         flask.abort(402)
 
@@ -240,7 +236,7 @@ def setIndex():
     )
     users = cur3.fetchall()
     for post in posts:
-        post['filename'] = insta485.app.config["UPLOAD_FOLDER"]/post['filename']
+        post['filename'] = "/uploads/" + post['filename']
         post['numberOfLikes'] = 0
         post['likes'] = []
         post['comments'] = []
@@ -309,7 +305,7 @@ def deletePost(id):
     except Exception as e:
         flask.abort(403)
         raise
-    return setIndex()
+    return
 
 
 def followUser(username):
@@ -376,7 +372,7 @@ def showUser(username_url_slug):
             context = {"user": user, "username" : flask.session["username"], "isFollowing": isFollowing, "total_posts": total_posts, "posts": userposts,"followers": followersCount,"following": followingCount}
 
             return flask.render_template("user.html", **context)
-    flask.abort(404)
+    return flask.redirect(flask.url_for("show_index"))
 
 def showFollowers(username_url_slug):
     connection = insta485.model.get_db()
@@ -397,7 +393,7 @@ def showFollowers(username_url_slug):
         if user['username'] == username_url_slug:
             good = 1
     if good == 0:
-        flask.abort(404)
+        return flask.redirect(flask.url_for("show_index"))
     for follow in follows:
         follow['logname_follows_username'] = 0
         name = follow['username1']
@@ -407,7 +403,7 @@ def showFollowers(username_url_slug):
                     follow['logname_follows_username'] = 1
             for user in users:
                 if user['username'] == follow['username1']:
-                    follow['user_img_url'] = insta485.app.config["UPLOAD_FOLDER"]/user['filename']
+                    follow['user_img_url'] = "/uploads/" + user['filename']
             userfollows.append(follow)
     context = {"followers": userfollows, "username" : flask.session["username"]}
     return flask.render_template("followers.html", **context)
@@ -432,18 +428,18 @@ def showFollowing(username_url_slug):
         if user['username'] == username_url_slug:
             good = 1
     if good == 0:
-        flask.abort(404)
+        return flask.redirect(flask.url_for("show_index"))
     for follow in follows:
         follow['logname_follows_username'] = 0
         name = follow['username2']
         if follow['username1'] == username_url_slug:
+            userfollows.append(follow)
             for follow1 in follows:
                 if flask.session["username"] == follow1['username2'] and follow1['username1'] == follow['username2']:
                     follow['logname_follows_username'] = 1
             for user in users:
                 if user['username'] == follow['username2']:
-                    follow['user_img_url'] = insta485.app.config["UPLOAD_FOLDER"]/user['filename']
-            userfollows.append(follow)
+                    follow['user_img_url'] = "/uploads/" + user['filename']
     context = {"followers": userfollows, "username" : flask.session["username"]}
     return flask.render_template("following.html", **context)
 
@@ -467,8 +463,8 @@ def showPost(postid_url_slug):
             users = cur1.fetchall()
             for user in users:
                 if user['username'] == post['owner']:
-                    post['owner_img_url'] = insta485.app.config["UPLOAD_FOLDER"]/user['filename']
-                    post['img_url'] = insta485.app.config["UPLOAD_FOLDER"]/post['filename']
+                    post['owner_img_url'] = "/uploads/" + user['filename']
+                    post['img_url'] = "/uploads/" + post['filename']
                     post['iLike'] = 0
                     post['likes'] = 0
                     cur2 = connection.execute(
@@ -494,7 +490,7 @@ def showPost(postid_url_slug):
                     post['created'] = arrow.get(post['created']).humanize()
                     context = {"post": post, "username" : flask.session["username"]}
                     return flask.render_template("post.html", **context)
-    flask.abort(403)
+    return flask.redirect(flask.url_for("login"))
 
 def explore():
     connection = insta485.model.get_db()
@@ -516,8 +512,8 @@ def explore():
     )
     users = cur.fetchall()
     for user in users:
-        if user['username'] not in dontinclude:
-            user['user_img_url'] = insta485.app.config["UPLOAD_FOLDER"]/user['filename']
+        if user['username'] not in dontinclude and user['username'] != str(flask.session["username"]):
+            user['user_img_url'] = "/uploads/" + user['filename']
             doinclude.append(user)
     context = {"users": doinclude, "username" : flask.session["username"]}
     return flask.render_template("explore.html", **context)
