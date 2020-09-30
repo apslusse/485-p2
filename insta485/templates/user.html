@@ -4,15 +4,30 @@
     <body>
       <a href="/"></a>
       <a href="/explore/">explore</a>
-      <a href="/u/{{logname}}/">{{logname}}</a>
+      <a href="/u/{{username}}/">{{username}}</a>
 
-        <p>{{username}}</p>
+        <p>{{user.username}}</p>
 
-        {% if username != logname %}
-          {% if logname_follows_username == false %}
-            <p>not following</p>
+        {% if username == user.username %}
+          <p>Edit profile</p>
+          <form action="/accounts/logout/" method="post" enctype="multipart/form-data">
+            <input type="submit" name="logout" value="Logout"/>
+            <input type="hidden" name="which" value="logout"/>
+          </form>
+        {% else %}
+          {% if isFollowing == 1 %}
+          <p>following</p>
+          <form action="#" method="post" enctype="multipart/form-data">
+            <input type="submit" name="unfollow" value="unfollow"/>
+            <input type="hidden" name="username" value="{{user.username}}"/>
+            <input type="hidden" name="which" value="unfollow"/>
+          </form>
           {% else %}
-            <p>following</p>
+          <form action="#" method="post" enctype="multipart/form-data">
+            <input type="submit" name="follow" value="follow"/>
+            <input type="hidden" name="username" value="{{user.username}}"/>
+            <input type="hidden" name="which" value="follow"/>
+          </form>
           {% endif %}
         {% endif %}
         {% if total_posts == 1 %}
@@ -21,16 +36,23 @@
               <p>{{total_posts}} posts</p>
         {% endif %}
         {% if followers == 1 %}
-                <a href="/u/{{username}}/followers/">{{followers}} follower</a>
+                <a href="/u/{{user.username}}/followers/">{{followers}} follower</a>
         {% else %}
-              <a href="/u/{{username}}/followers/">{{followers}} followers</a>
+              <a href="/u/{{user.username}}/followers/">{{followers}} followers</a>
+        {% endif %}
+        <a href="/u/{{user.username}}/following/">{{following}} following</a>
+        <p>{{user.fullname}}</p>
+        {% if username == user.username %}
+        <form action="#" method="post" enctype="multipart/form-data">
+          <input type="file" name="file">
+          <input type="submit" name="create_post" value="upload new post"/>
+          <input type="hidden" name="which" value="create_post"/>
+        </form>
         {% endif %}
 
-        <a href="/u/{{username}}/following/">{{following}} following</a>
-        <p>{{fullname}}</p>
 
         {% for post in posts %}
-          <a href="/p/{{post.postid}}/"><img src="{{post.img_url}}" alt="Smiley face"></a>
+          <a href="/p/{{post.postid}}/"><img src="{{post.filename}}" alt="Smiley face"></a>
         {% endfor %}
     </body>
 </html>

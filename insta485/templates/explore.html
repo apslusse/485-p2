@@ -4,12 +4,17 @@
     <body>
       <a href="/"></a>
       <a href="/explore/">explore</a>
-      <a href="/u/{{logname}}">{{logname}}</a>
+      <a href="/u/{{username}}/">{{username}}</a>
 
       <p>Discover People</p>
-      {% for entry in not_following %}
+      {% for entry in users %}
         <img src="{{entry.user_img_url}}" alt="Smiley face">
-        <a href="/u/{{entry.username}}">{{entry.username}}</a>
+        <a href="/u/{{entry.username}}/">{{entry.username}}</a>
+        <form action="#" method="post" enctype="multipart/form-data">
+          <input type="submit" name="follow" value="follow"/>
+          <input type="hidden" name="username" value="{{entry.username}}"/>
+          <input type="hidden" name="which" value="follow"/>
+        </form>
       {% endfor %}
     </body>
 </html>

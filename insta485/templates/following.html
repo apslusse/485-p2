@@ -4,17 +4,27 @@
     <body>
       <a href="/"></a>
       <a href="/explore/">explore</a>
-      <a href="/u/{{logname}}/">{{logname}}</a>
+      <a href="/u/{{username}}/">{{username}}</a>
 
       <p>Following</p>
-      {% for entry in following %}
+      {% for entry in followers %}
         <img src="{{entry.user_img_url}}" alt="Smiley face">
-        <a href="/u/{{entry.username}}/">{{entry.username}}</a>
-        {% if entry.username != logname %}
-          {% if entry.logname_follows_username == false %}
+        <a href="/u/{{entry.username2}}/">{{entry.username2}}</a>
+        {% if entry.username1 != username %}
+          {% if entry.logname_follows_username == 0 %}
             <p>not following</p>
+            <form action="#" method="post" enctype="multipart/form-data">
+              <input type="submit" name="follow" value="follow"/>
+              <input type="hidden" name="username" value="{{entry.username2}}"/>
+              <input type="hidden" name="which" value="follow"/>
+            </form>
           {% else %}
             <p>following</p>
+            <form action="#" method="post" enctype="multipart/form-data">
+              <input type="submit" name="unfollow" value="unfollow"/>
+              <input type="hidden" name="username" value="{{entry.username2}}"/>
+              <input type="hidden" name="which" value="unfollow"/>
+            </form>
           {% endif %}
         {% endif %}
       {% endfor %}
